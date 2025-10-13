@@ -1,0 +1,28 @@
+# run_preprocess.py
+from preprocess import extract_text
+from pre_pipeline import build_chunks_from_blocks_and_ocr
+
+def main():
+    html = """<p><span>2025 </span><span>학년도 </span><span> 1 </span><span>학기 학점교류 수강안내 </span><span>( </span><span>국민대 </span><span>_ </span><span>차세대통신 </span><span>) </span></p><p><span>안녕하세요 </span><span>,  </span><span>첨단분야 혁신융합대학사업단 </span><span>(COSS) </span><span>입니다 </span><span>. </span></p><p><span>COSS  </span><span>사업의 일환으로 매학기 차세대통신 분야 대학 간 학점교류를 진행하고 있습니다 </span><span>. </span></p><p><span>( </span><span>※ </span><span>  </span><span>차세대통신 소속 대학 </span><span>:  </span><span>한국항공대학교 </span><span>,  </span><span>국민대학교 </span><span>,  </span><span>서울시립대학교 </span><span>,  </span><span>울산과학대학교 </span><span>,  </span><span>전남대학교 </span><span>) </span></p><p><span>국민대학교에서 운영하는 </span><span> 2025 </span><span>학년도 </span><span> 1 </span><span>학기 학점교류를 안내드리오니 많은 참여 바랍니다 </span><span>. </span></p><p><span>&lt; </span><span>국민대학교 </span><span> 2025 </span><span>학년도 </span><span> 1 </span><span>학기 학점교류 수강안내 </span><span>&gt; </span></p><p><span>1.  </span><span>대상 대학교 </span><span> :  </span><span>국민대학교 </span></p><p><span>2.  </span><span>교과목 정보 </span></p><table><tbody><tr><td><p><span>연번 </span></p></td><td><p><span>교과목명 </span></p></td><td><p><span>학점 </span></p></td><td><p><span>수업시간 </span></p></td><td><p><span>강의실 </span></p></td></tr><tr><td><p><span>1 </span></p></td><td><p><span>다학제간캡스톤디자인 </span><span>( </span><span>차세대통신 </span><span>) I </span></p></td><td><p><span>5( </span><span>서울시립대에서 </span><span> 3 </span><span>학점으로 인정 </span><span>) </span></p></td><td><p><span>토 </span><span> 10:00-15:00 </span></p></td><td><p><span>미래관 </span><span> 522 </span><span>호실 </span></p></td></tr></tbody></table><p><span>※ </span><span>  </span><span>수업기간 </span><span> : 2025.03.04.( </span><span>화 </span><span>) ~ 2025.06.23.( </span><span>월 </span><span>) </span></p><p><span>※ </span><span> " </span><span>다학제간캡스톤디자인 </span><span>( </span><span>차세대통신 </span><span>) </span><span>Ⅰ </span><span>"  </span><span>과목 내에 </span><span> 2 </span><span>개 트랙 운영 </span><span> ( </span><span>일반트랙 </span><span>/ </span><span>삼성트랙 </span><span>) </span></p><p><span>☞ </span><span>  </span><span>일반트랙 </span><span>:  </span><span>이수 성과에 따른 </span><span> CES  </span><span>박람회 전시 참여 기회 제공 </span></p><p><span>( </span><span>이수성과 기준 미달자는 </span><span>CES </span><span>에 전시 참여 불가하나 </span><span>, </span><span>사업단 내부 프로그램으로 해외 견학기회 제공 </span><span>) </span></p><p><span>☞ </span><span>  </span><span>삼성트랙 </span><span>:  </span><span>삼성전자 프로젝트 멘토링 </span><span>,  </span><span>프로젝트 평가에 따른 학생 인턴 기회 제공 </span></p><p><span>▶ </span><span>  </span><span>세부사항 </span><span> " </span><span>세부트랙 안내 </span><span>"( </span><span>첨부 </span><span>4)  </span><span>참고 </span></p><p><span>4.  </span><span>신청 자격 </span><span> :  </span><span>서울시립대학교 재학생 </span><span> ( </span><span>전체학기 평점평균 </span><span> 3.0  </span><span>이상 </span><span>) </span></p><p><span>5.  </span><span>신청 기한 </span><span> : 2025.03.9.( </span><span>일 </span><span>) 23 </span><span>시까지 </span></p><p><span>6.  </span><span>신청 방법 </span><span> :  </span><span>학점교류 신청서 </span><span>( </span><span>첨부파일 </span><span>)  </span><span>작성 및 메일 제출 </span><span>(yuna@uos.ac.kr) </span></p><p><span>※ </span><span>  </span><span>메일제목 </span><span> : [ </span><span>학점교류 신청 </span><span>_ </span><span>국민대 </span><span>] </span><span>학번 </span><span>_ </span><span>이름 </span><span>( </span><span>연락처 </span><span>) </span></p><p><span>※ </span><span>  </span><span>다학제간캡스톤디자인 신청시 </span><span> ' </span><span>비고 </span><span>' </span><span>란에 신청 트랙 작성 </span></p><p><u><span>※ </span></u><u><span>  </span></u><u><span>신청 후 세부 트랙 변경이 불가하므로 이점 숙지 후 신청 필요 </span></u></p><p><span>7.  </span><span>수강신청학점 </span><span> : 9 </span><span>학점 이내 </span></p><p><span>가 </span><span>.  </span><span>학점교류 수강신청학점은 본교 수강 최대수강신청 학점에 포함되며 </span><span>, </span></p><p><span>최대수강신청학점을 초과하여 신청할 경우 학점 교류 학점은 인정되지 않음 </span></p><p><span>나 </span><span>.  </span><span>본인이 이수한 과목과 동일한 교과목은 수강 불가 </span></p><p><span>8.  </span><span>성적처리 </span></p><p><span>가 </span><span>.  </span><span>성적처리는 교과목 운영 대학의 규정에 따라 평가 </span></p><p><span>나 </span><span>.  </span><span>학점교류로 성적 취득한 과목의 이수구분은 </span><span> “ </span><span>일선 </span><span>” </span><span>으로 인정됨 </span></p><p><span>다 </span><span>.  </span><span>학점교류로 취득한 학점은 장학금 지급 </span><span>( </span><span>성적 인정 시기에 따라 다를 수 있으므로 자세한 사항은 학생지원팀에 문의 </span><span>) </span></p><p><span>및 우수학생 수강신청 추가학점인정 등의 성적으로 인정되지 않으나 </span><span>,  </span><span>전체 평점평균에 반영되므로 </span><span> F </span><span>학점 취득 시 </span></p><p><span>성적경고 등의 불이익을 받을 수 있음 </span></p><p><span>9.  </span><span>문의 </span><span> :  </span><span>차세대통신혁신융합대학사업단 </span></p><p><span>▷ </span><span> 02-6490-6930 / yuna@uos.ac.kr </span></p><p><span>첨단분야 혁신융합대학사업단 </span><span>( </span><span>차세대통신 </span><span>) </span></p>"""
+    ocr_map = {
+        "https://file.uos.ac.kr/upload/smarteditor/2025/09/20250910173204.png":
+            "접수기간 2025-09-01 ~ 2025-10-12, 총 상금 300만원(최우수 100만원, 우수 70만원x2, 장려 30만원x2)"
+    }
+
+    extracted_texts = extract_text(html)
+
+    chunks = build_chunks_from_blocks_and_ocr(
+        html=html,
+        extracted_texts=extracted_texts,
+        ocr_map=ocr_map,
+        max_tokens=512,
+        overlap_sents=1,
+    )
+
+    print(f"\n청크 수: {len(chunks)}")
+    for i, ch in enumerate(chunks[:10]):
+        print(f"\n[{i}] (len={len(ch)})")
+        print(ch)
+
+if __name__ == "__main__":
+    main()
