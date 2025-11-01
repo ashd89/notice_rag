@@ -31,7 +31,7 @@ def build_chunks_from_blocks_and_ocr(
     blocks = [fix_numbers_units(b) for b in blocks]
     # 3
     blocks = absorb_fragments(blocks, min_len=5)
-    # 4                                                                                                                                                                                  
+    # 4
     sections = group_by_headings(blocks)
     # 5
     chunks: List[str] = []

@@ -3,9 +3,15 @@
 # app = FastAPI()
 
 
+<<<<<<< HEAD
 # @app.post("/ingest")
 # async def root():
 #     return {"message": "Hello World"}
+=======
+@app.post("/ingest")
+async def root():
+    return {"message": "Hello World"}
+>>>>>>> origin/dev
 
 
 # @app.get("/hello/{name}")
