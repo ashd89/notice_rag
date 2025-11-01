@@ -3,7 +3,7 @@ from preprocess import *
 from typing import List, Dict, Tuple, Optional, Callable, Any
 
 __all__ = [
-        # 파이프라인 엔드포인트
+    # 파이프라인 엔드포인트
     "build_chunks_from_blocks_and_ocr",
 ]
 
@@ -41,11 +41,31 @@ def build_chunks_from_blocks_and_ocr(
     for img_src, ocr_text in (ocr_map or {}).items():
         if not ocr_text:
             continue
-        idx = find_nearest_prev_chunk_index(img_src, chunks, html)
-        ocr_blob = "\n\n[IMAGE_TEXT]\n" + normalize(ocr_text)
-        chunks[idx] = (chunks[idx] + ocr_blob) if ocr_blob not in chunks[idx] else chunks[idx]
+        
+        # OCR 텍스트도 max_tokens에 맞춰 청크 분할
+        ocr_chunks = pack_by_tokens(
+            sentences=[normalize(ocr_text)], 
+            max_tokens=max_tokens, 
+            overlap_sents=0, # OCR 텍스트는 문장 중첩이 의미 없음
+            token_len=token_len
+        )
+        
+        if not ocr_chunks:
+            continue
+
+        # 분할된 OCR 청크들을 기존 청크에 병합/추가
+        first_ocr_chunk = "\n\n[IMAGE_TEXT]\n" + ocr_chunks[0]
+        
+        if not chunks:
+            chunks.append(first_ocr_chunk.strip())
+        else:
+            idx = find_nearest_prev_chunk_index(img_src, chunks, html)
+            if first_ocr_chunk not in chunks[idx]:
+                chunks[idx] += first_ocr_chunk
+        
+        # 나머지 OCR 청크들은 새로운 청크로 추가
+        for ocr_part in ocr_chunks[1:]:
+            chunks.append(("\n\n[IMAGE_TEXT]\n" + ocr_part).strip())
     # 7
     chunks = dedupe([c.strip() for c in chunks if c.strip()])
     return chunks
-
-

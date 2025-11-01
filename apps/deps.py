@@ -2,17 +2,16 @@
 """
 FastAPI에서 재사용할 공용 의존성 모듈 lazy singleton 초기화
 """
-
 from __future__ import annotations
 import os
 from functools import lru_cache
 from typing import Optional
 
 from dotenv import load_dotenv
-from openai import AsyncOpenAI
+# from openai import AsyncOpenAI
 from pydantic_settings import BaseSettings
 
-from langchain.embeddings import OpenAIEmbeddings
+# from langchain.embeddings import OpenAIEmbeddings
 load_dotenv()
 
 # ---------- Settings ----------
@@ -42,6 +41,9 @@ class Settings(BaseSettings):
 
   # OCR
   ocr_timeout: float = 10.0
+  azure_docint_endpoint: Optional[str] = None
+  azure_docint_key: Optional[str] = None
+  ocr_locale_default: Optional[str] = "ko"
 
   # Retriever 기본값
   retriever_k: int = 6
@@ -56,18 +58,18 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
   return Settings()
 
-# ---------- Embeddings ----------
-@lru_cache(maxsize=1)
-def get_embeddings() -> OpenAIEmbeddings:
-  cfg = get_settings()
-  if cfg.embed_provider == "tei":
-    return OpenAIEmbeddings(
-      model=cfg.embed_model,
-      api_key=cfg.embeddings_api_key,
-      base_url=cfg.embeddings_base_url,
-    )
-  else:
-    return OpenAIEmbeddings(
-      model=cfg.embed_model,
-      api_key=cfg.openai_api_key,
-    )
+# # ---------- Embeddings ----------
+# @lru_cache(maxsize=1)
+# def get_embeddings() -> OpenAIEmbeddings:
+#   cfg = get_settings() 
+#   if cfg.embed_provider == "tei":
+#     return OpenAIEmbeddings(
+#       model=cfg.embed_model,
+#       api_key=cfg.embeddings_api_key,
+#       base_url=cfg.embeddings_base_url,
+#     )
+#   else:
+#     return OpenAIEmbeddings(
+#       model=cfg.embed_model,
+#       api_key=cfg.openai_api_key,
+#     )
