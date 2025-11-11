@@ -1,14 +1,12 @@
 # app/deps.py
-"""
-FastAPI에서 재사용할 공용 의존성 모듈 lazy singleton 초기화
-"""
 from __future__ import annotations
 import os
 from functools import lru_cache
 from typing import Optional
 
 from dotenv import load_dotenv
-# from openai import AsyncOpenAI
+from openai import AsyncOpenAI
+from langchain.embeddings import OpenAIEmbeddings
 from pydantic_settings import BaseSettings
 
 # from langchain.embeddings import OpenAIEmbeddings
@@ -20,17 +18,11 @@ class Settings(BaseSettings):
   openai_api_key: str
   gemini_api_key: str
 
-  # Vector
-  embed_provider: str = "tei"
-  embed_model: str = "BAAI/bge-m3"
-  embed_dim: int = 1024
-  embeddings_base_url: str = "http://localhost:8080/v1"
-  embeddings_api_key: str = "dummy"    
-
   # PGVector
   pg_conn: str
-  collection_name: str = "uos_announcement"
+  collection_name: str = "embedded_announcement"
   embed_model: str = "text-embedding-3-small"
+  embed_dim: int = 1536
   use_jsonb: bool = True
 
   # LLM
@@ -58,18 +50,29 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
   return Settings()
 
-# # ---------- Embeddings ----------
-# @lru_cache(maxsize=1)
-# def get_embeddings() -> OpenAIEmbeddings:
-#   cfg = get_settings() 
-#   if cfg.embed_provider == "tei":
-#     return OpenAIEmbeddings(
-#       model=cfg.embed_model,
-#       api_key=cfg.embeddings_api_key,
-#       base_url=cfg.embeddings_base_url,
-#     )
-#   else:
-#     return OpenAIEmbeddings(
-#       model=cfg.embed_model,
-#       api_key=cfg.openai_api_key,
-#     )
+
+# ---------- OpenAI Client ----------
+_openai_client: Optional[AsyncOpenAI] = None
+
+def get_openai_client() -> AsyncOpenAI:
+  """AsyncOpenAI 클라이언트 (싱글톤)."""
+  global _openai_client
+  if _openai_client is None:
+    from openai import AsyncOpenAI
+    cfg = get_settings()
+    _openai_client = AsyncOpenAI(api_key=cfg.openai_api_key)
+  return _openai_client
+
+# ---------- Embeddings ----------
+_embeddings: Optional[OpenAIEmbeddings] = None
+
+def get_embeddings() -> OpenAIEmbeddings:
+  """OpenAI 임베딩 인스턴스."""
+  global _embeddings
+  if _embeddings is None:
+    cfg = get_settings()
+    _embeddings = OpenAIEmbeddings(
+        model=cfg.embed_model,
+        api_key=cfg.openai_api_key
+    )
+  return _embeddings
