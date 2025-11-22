@@ -22,12 +22,15 @@ __all__ = [
 # =============== 공통 유틸 ===============
 def extract_text(html: str) -> List[str]:
     soup = BeautifulSoup(html, "html.parser")
-    texts = []
-    for tag in soup.find_all(["h1", "h2", "p", "li", "span"]):
-        txt = tag.get_text(strip=True)
-        if txt and txt not in texts:
-          texts.append(txt)
-    return texts
+    blocks = []
+    for tag in soup.find_all(["h1", "h2", "h3", "h4", "p", "li", "div"]):
+        # 태그 내부에 다른 블록 태그가 중첩되어 있다면 건너뜁니다.
+        if tag.find(lambda t: t.name in ['p', 'div', 'li'] and t is not tag):
+            continue
+        text = tag.get_text(separator=' ', strip=True)
+        if text:
+            blocks.append(text)
+    return dedupe(blocks)
 
 
 def normalize(s: str) -> str:
