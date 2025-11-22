@@ -1,5 +1,5 @@
 # pre_pipeline module
-from preprocess import * 
+from .preprocess import * 
 from typing import List, Dict, Tuple, Optional, Callable, Any
 
 __all__ = [
@@ -42,13 +42,19 @@ def build_chunks_from_blocks_and_ocr(
         if not ocr_text:
             continue
         
-        # OCR 텍스트도 max_tokens에 맞춰 청크 분할
-        ocr_chunks = pack_by_tokens(
-            sentences=[normalize(ocr_text)], 
-            max_tokens=max_tokens, 
-            overlap_sents=0, # OCR 텍스트는 문장 중첩이 의미 없음
-            token_len=token_len
-        )
+        # OCR 텍스트도 HTML 본문과 동일하게 1~5단계 전처리 수행
+        # 1. OCR 텍스트를 라인으로 분리하고 테이블 처리
+        ocr_blocks = normalize_and_zip_table([normalize(x) for x in ocr_text.split('\n')])
+        # 2. 숫자/단위 정규화
+        ocr_blocks = [fix_numbers_units(b) for b in ocr_blocks]
+        # 3. 짧은 파편 흡수
+        ocr_blocks = absorb_fragments(ocr_blocks, min_len=5)
+        # 4. 헤딩 기준 섹션화
+        ocr_sections = group_by_headings(ocr_blocks)
+        # 5. 섹션별 토큰 길이 재패킹
+        ocr_chunks: List[str] = []
+        for sec in ocr_sections:
+            ocr_chunks.extend(pack_by_tokens(sec, max_tokens=max_tokens, overlap_sents=0, token_len=token_len))
         
         if not ocr_chunks:
             continue

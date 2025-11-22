@@ -19,8 +19,13 @@ class Settings(BaseSettings):
   gemini_api_key: str
 
   # PGVector
-  pg_conn: str
-  collection_name: str = "embedded_announcement"
+  db_user: str
+  db_password: str
+  db_name: str
+  db_host: str
+  db_port: int
+  collection_name: str = "embedding"
+
   embed_model: str = "text-embedding-3-small"
   embed_dim: int = 1536
   use_jsonb: bool = True
